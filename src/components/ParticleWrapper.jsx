@@ -1,4 +1,4 @@
-import React, { useEffect, useRef,useState } from "react";
+import React, { useEffect, useRef,useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, GradientTexture, useScroll, Points, Point, PointMaterial} from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -28,57 +28,93 @@ function PointEvent(props) {
 }
 
   const ParticleGeometry = ({geometry}) => {
-      let positions = []
-      var count = geometry.attributes.position.array.length / 3
-      var colors = new Float32Array(geometry.attributes.position.array.length)
-      geometry.attributes.position.array.forEach((p, i )=> {
-        colors[i] = Math.random()
-      })
-      console.log(colors)
-      console.log(geometry.attributes.position)
-      geometry.setAttribute('color', new THREE.BufferAttribute(colors,3))
+      
+      const color1 = new THREE.Color("#eba541");
+      const color2 = new THREE.Color("#aa4632");
+      const color3 = new THREE.Color("#1e1e55");
+      const color4 = new THREE.Color("#0a0a1e");
+      
+      const vertices = geometry.attributes.position.array;
 
-var material = new THREE.ShaderMaterial( {
-    uniforms: {
-      "color1": {
-        type : "c",
-        value: new THREE.Color(0x2753c9)
-      },
-      "color2": {
-        type : "c",
-        value: new THREE.Color(0x1dcdc0)
+    
+      var colors = new Float32Array(vertices.length)
+      var positions = new Float32Array(vertices.length)
+      var positionsArr = []
+      
+      for (let i = 0; i < (vertices.length / 3); i++) {
+        const i3 = i * 3
+        positionsArr.push([vertices[i3 + 0],vertices[i3 + 1],vertices[i3 + 2]])
       }
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      varying vec4 pos;
-
-      void main() {
-        vUv = uv;
-        gl_PointSize = 4.0;
-        pos = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-        gl_Position = pos;
+      positionsArr.sort((a, b) => a[1] - b[1])
+      const flatpos = positionsArr.flat()
+      for (let i = 0; i < vertices.length; i++) {
+        positions[i] = flatpos[i]
       }
-    `,
-    fragmentShader: `
-      uniform vec3 color1;
-      uniform vec3 color2;
-      varying vec2 vUv;
-      varying vec4 pos;
+      let t = THREE.MathUtils.smoothstep(positions[565],positionsArr[0][1],positionsArr[positionsArr.length-1][1])
+      console.log(t, positions[925156], positionsArr[0][1], positionsArr[positionsArr.length-1][1], positionsArr.length-1)
+      for (let i = 0; i < positions.length; i++) {
+        // const t = (i * 3) / vertices.length;
+        const t = ((100*i)/vertices.length)/100
+        // Define the color stops for each color
+        var stop1 = 0.0;
+        var stop2 = 0.33;
+        var stop3 = 0.66;
+        var stop4 = 1.0;
+        let color = new THREE.Color().lerpColors(color1, color4, 0);
+        // Calculate the color for the current position
+        if (t < stop2) {
+          color = new THREE.Color().lerpColors(color1, color2, THREE.MathUtils.smoothstep(t,0,stop2));
+        } else if (t < stop3) {
+          color = new THREE.Color().lerpColors(color2, color3, THREE.MathUtils.smoothstep(t,stop2,stop3));
+        } else {
+          color = new THREE.Color().lerpColors(color3, color4, THREE.MathUtils.smoothstep(t,stop3,stop4));
+        }
+        // console.log(t)
+        colors[i] = (color.r, color.g, color.b);
+      }
+      // console.log(positions)
 
-            void main() {
-                if ( length( gl_PointCoord - vec2( 0.5, 0.5 ) ) > 0.475 ) discard;
-                gl_FragColor = vec4(mix(color1, color2, smoothstep(-10.0, 10.0, pos.x)), 1.0);
-            }
-    `
-  });
+      // Set the vertexColors property of the geometry to the colors array
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors,3));
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions,3));
 
-  
-      useFrame(()=> {
+      // var count = geometry.attributes.position.array.length / 3
+      // var colors = new Float32Array(geometry.attributes.position.array.length)
+      // geometry.attributes.position.array.forEach((p, i )=> {
+      //   colors[i] = Math.random()
+      // })
+
+      // const mouseRef = useRef(0)
+      // // console.log(geometry.attributes.position)
+      // geometry.setAttribute('color', new THREE.BufferAttribute(colors,3))
+      
+      const points = useRef();
+      const radius = 2;
+      const uniforms = useMemo(() => ({
+        uTime: {
+          value: 0.0
+        },
+        uRadius: {
+          value: radius
+        },
+        uTexture: {
+          value: new THREE.TextureLoader().load("/v.png")
+        }
+      }), [])
+      useFrame((state, delta) => {
+        const { clock } = state;
         
-      })
+        // points.current.rotation.y += delta * 0.5
+        // points.current.material.uniforms.uTime.value = clock.elapsedTime;
+
+        
+
+      });
+
+      let showVertex = false
+   
     return (
-      <points >
+      <points ref={points} >
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -93,36 +129,10 @@ var material = new THREE.ShaderMaterial( {
           itemSize={1}
         />
       </bufferGeometry>
-
-      <shaderMaterial
-      uniforms={{
-        "color1": {
-          type : "c",
-          value: new THREE.Color(0xeba541)
-        },
-        "color2": {
-          type : "c",
-          value: new THREE.Color(0xaa4632)
-        }
-      }}
-      vertexShader={`varying vec2 vUv;
-      varying vec4 pos;
-
-      void main() {
-        vUv = uv;
-        gl_PointSize = 10.0;
-        pos = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-        gl_Position = pos;
-      }`}
-      fragmentShader={`uniform vec3 color1;
-      uniform vec3 color2;
-      varying vec2 vUv;
-      varying vec4 pos;
-
-            void main() {
-                if ( length( gl_PointCoord - vec2( 0.5, 0.5 ) ) > 0.475 ) discard;
-                gl_FragColor = vec4(mix(color1, color2, smoothstep(-10.0, 10.0, pos.y)), 0.8);
-            }`}  />
+      {showVertex ? 
+        <PointMaterial transparent vertexColors size={1} sizeAttenuation={false} depthWrite={false} /> :  // COLOR
+        <PointMaterial transparent map={new THREE.TextureLoader().load("/v.png")} size={10} sizeAttenuation={false} depthWrite={false} /> // TEXTURE
+      }
       </points>
     )
 
@@ -177,7 +187,6 @@ const ParticleWrapper = ({ url }) => {
   useFrame((state, delta) => {
     if (group.current) {
       const mesh = group.current;
-      console.log(scroll.scroll.current)
       // if(mesh.position.y > -90){
           // mesh.rotation.z = scroll.scroll.current
           mesh.position.y = -90 * scroll.scroll.current
@@ -195,7 +204,7 @@ const ParticleWrapper = ({ url }) => {
   });
   const points = useRef();
   return model ? (
-    <group scale={[500,500,500]}  ref={group}>
+    <group scale={[700,500,200]}  ref={group}>
       <group position={[0,0.15,0]}>
       {model && model.children[0].children.map(i => {
         if(i.isMesh && i.name==="VARA_METAL_LIQUID002"){
