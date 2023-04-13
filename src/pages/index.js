@@ -2,7 +2,7 @@ import Head from 'next/head'
 import { Canvas } from '@react-three/fiber';
 import Image from 'next/image'
 import { Inter } from '@next/font/google'
-import { Box, OrbitControls, ScrollControls, useScroll, Environment } from '@react-three/drei'
+import { Box, OrbitControls, ScrollControls, useScroll, Environment, Sparkles, Cloud } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
 import ParticleWrapper from '@/components/ParticleWrapper';
@@ -24,8 +24,10 @@ export default function Home() {
       <ambientLight intensity={1} />
       <directionalLight/>
       <Environment preset="sunset" />
+      <Sparkles count={1000} scale={10 * 2} size={2} speed={1} />
+      
       <ScrollControls pages={3}>
-        <ParticleWrapper url={'/VARA_LIQUID_METAL_POLY-LINES_V2.glb'}/>
+        <ParticleWrapper url={'/VARA_LIQUID_METAL_POLY-LINES_V5a.glb'}/>
       </ScrollControls>
       </>
       </Canvas>

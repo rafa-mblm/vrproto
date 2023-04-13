@@ -101,5 +101,5 @@ html, body, #__next {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  
+  background: #999;
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef,useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF, GradientTexture, useScroll, Points, Point, PointMaterial} from "@react-three/drei";
+import { useGLTF, GradientTexture, useScroll, Points, Point, PointMaterial, Sparkles} from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import * as THREE from "three";
 
@@ -104,7 +104,7 @@ function PointEvent(props) {
       useFrame((state, delta) => {
         const { clock } = state;
         
-        // points.current.rotation.y += delta * 0.5
+        points.current.rotation.y -= delta * 0.5
         // points.current.material.uniforms.uTime.value = clock.elapsedTime;
 
         
@@ -130,9 +130,11 @@ function PointEvent(props) {
         />
       </bufferGeometry>
       {showVertex ? 
-        <PointMaterial transparent vertexColors size={1} sizeAttenuation={false} depthWrite={false} /> :  // COLOR
-        <PointMaterial transparent map={new THREE.TextureLoader().load("/v.png")} size={10} sizeAttenuation={false} depthWrite={false} /> // TEXTURE
+        <PointMaterial transparent vertexColors size={2} sizeAttenuation={false} depthWrite={false} /> :  // COLOR
+        <PointMaterial transparent map={new THREE.TextureLoader().load("/VARA_Pattern_Animation_Mesh_V4.png")} size={30} sizeAttenuation={false} depthWrite={false} /> // TEXTURE
       }
+      
+      
       </points>
     )
 
@@ -189,7 +191,7 @@ const ParticleWrapper = ({ url }) => {
       const mesh = group.current;
       // if(mesh.position.y > -90){
           // mesh.rotation.z = scroll.scroll.current
-          mesh.position.y = -90 * scroll.scroll.current
+          mesh.position.y = -65 * scroll.scroll.current
       // }
       
 
@@ -205,9 +207,10 @@ const ParticleWrapper = ({ url }) => {
   const points = useRef();
   return model ? (
     <group scale={[700,500,200]}  ref={group}>
-      <group position={[0,0.15,0]}>
+      <group position={[0.005,0.05,0]}>
+      
       {model && model.children[0].children.map(i => {
-        if(i.isMesh && i.name==="VARA_METAL_LIQUID002"){
+        if(i.isMesh && i.name==="VARA_METAL_LIQUID003"){
           return <ParticleGeometry geometry={i.geometry}/>
         }
       })}
