@@ -27,7 +27,7 @@ export default function Home() {
       <Sparkles count={1000} scale={10 * 2} size={2} speed={1} />
       
       <ScrollControls pages={3}>
-        <ParticleWrapper url={'/VARA_LIQUID_METAL_POLY-LINES_V5a.glb'}/>
+        <ParticleWrapper url={'/VARA_LIQUID_METAL_POLY-LINES_V2.glb'}/>
       </ScrollControls>
       </>
       </Canvas>

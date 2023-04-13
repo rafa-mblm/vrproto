@@ -131,7 +131,7 @@ function PointEvent(props) {
       </bufferGeometry>
       {showVertex ? 
         <PointMaterial transparent vertexColors size={2} sizeAttenuation={false} depthWrite={false} /> :  // COLOR
-        <PointMaterial transparent map={new THREE.TextureLoader().load("/VARA_Pattern_Animation_Mesh_V4.png")} size={30} sizeAttenuation={false} depthWrite={false} /> // TEXTURE
+        <PointMaterial transparent vertexColors map={new THREE.TextureLoader().load("/VARA_Pattern_Animation_Favicon_V1.png")} size={20} sizeAttenuation={false} depthWrite={false} /> // TEXTURE
       }
       
       
@@ -210,7 +210,7 @@ const ParticleWrapper = ({ url }) => {
       <group position={[0.005,0.05,0]}>
       
       {model && model.children[0].children.map(i => {
-        if(i.isMesh && i.name==="VARA_METAL_LIQUID003"){
+        if(i.isMesh && i.name==="VARA_METAL_LIQUID002"){
           return <ParticleGeometry geometry={i.geometry}/>
         }
       })}
